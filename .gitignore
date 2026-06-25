@@ -1,0 +1,30 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+
+# Pipeline / deploy artifacts (generated, not source) — match under any tool dir
+**/.cache/
+**/feed.json
+**/build/
+**/infra/packaged.yaml
+**/.assets/
+**/web-assets.tar.gz
+
+# Secrets — never commit these (any tool dir)
+.env
+**/.env
+
+# Read-only source clones (assessment input; never committed). One per tool.
+_source/
+tools/*/_source/
+
+# Office lock files
+~$*
+
+# Local Claude Code settings (machine-local, not shared)
+.claude/settings.local.json
+
+# macOS
+.DS_Store
