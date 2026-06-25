@@ -1,0 +1,295 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  The Philadelphia Weather Machine (fixit / Pattern C). A scheduled Lambda
+  rewrites NWS/IEM data with Bedrock (Claude Sonnet 4.6) and writes feed.json to
+  a private S3 bucket (Pattern B). An EC2 instance serves the static front-end
+  on a dedicated port behind an ALB+Okta gate (Pattern A), pulling feed.json
+  from S3 on a timer. The ALB, Okta OIDC app, target group, listener rule, and
+  DNS are provisioned OUT OF BAND by the operator (see the builder spec in
+  DEPLOYMENT.md) and referenced here only by parameter.
+
+Parameters:
+  ContactEmail:
+    Type: String
+    Default: weather-machine@inquirer.com
+    Description: Shown to NWS in the request User-Agent.
+  BedrockModelId:
+    Type: String
+    Default: us.anthropic.claude-sonnet-4-6
+  ScheduleExpression:
+    Type: String
+    Default: rate(3 minutes)
+  SiteUrl:
+    Type: String
+    Default: ""
+    Description: Public (Okta-gated) URL of the site, used in Slack links. Set to the ALB/DNS host once known.
+
+  # --- Front-end host inputs (builder supplies the existing network) ----------
+  VpcId:
+    Type: AWS::EC2::VPC::Id
+    Description: VPC the front-end EC2 host and its security group live in.
+  SubnetId:
+    Type: AWS::EC2::Subnet::Id
+    Description: Subnet for the front-end EC2 host (a private subnet the ALB can reach).
+  AlbSecurityGroupId:
+    Type: AWS::EC2::SecurityGroup::Id
+    Description: The ALB's security group. The host SG accepts the app port ONLY from this SG.
+  WebAppPort:
+    Type: Number
+    Default: 8080
+    Description: Port the front-end service listens on (target-group target port).
+  InstanceType:
+    Type: String
+    Default: t3.micro
+  LatestAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Amazon Linux 2023 AMI (resolved via SSM public parameter).
+
+  # --- Where the bootstrap pulls the site bundle from -------------------------
+  AssetsBucket:
+    Type: String
+    Description: S3 bucket holding the deploy artifacts (set by deploy.sh).
+  AssetsKey:
+    Type: String
+    Default: web-assets.tar.gz
+    Description: Key of the front-end bundle (site/ + feed-sync.sh + units) in AssetsBucket.
+
+Resources:
+
+  # --- Storage: private bucket for feed.json (read by EC2, NOT public) --------
+  SiteBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # --- Rewrite cache: one row per alert, auto-expiring ------------------------
+  CacheTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+
+  # --- Slack webhook secret (replaces the old SSM SecureString) ---------------
+  # Created empty; the operator puts the real webhook URL in after deploy. Until
+  # then the Lambda simply skips Slack (no crash). Never stored in source.
+  SlackSecret:
+    Type: AWS::SecretsManager::Secret
+    Properties:
+      Name: weather-machine/slack-webhook
+      Description: Slack incoming webhook URL for Weather Machine alerts (set out of band).
+
+  # --- Lambda execution role (least privilege) --------------------------------
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: weather-machine-lambda
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: Logs
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:*"
+              - Sid: InvokeClaude
+                Effect: Allow
+                Action: bedrock:InvokeModel
+                Resource:
+                  - !Sub "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-6*"
+                  - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${BedrockModelId}"
+              - Sid: Cache
+                Effect: Allow
+                Action:
+                  - dynamodb:GetItem
+                  - dynamodb:PutItem
+                Resource: !GetAtt CacheTable.Arn
+              - Sid: WriteFeed
+                Effect: Allow
+                Action: s3:PutObject
+                Resource: !Sub "${SiteBucket.Arn}/feed.json"
+              - Sid: ReadSlackWebhook
+                Effect: Allow
+                Action: secretsmanager:GetSecretValue
+                Resource: !Ref SlackSecret
+
+  # --- The function -----------------------------------------------------------
+  RewriteFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: lambda_function.handler
+      Timeout: 120
+      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
+      Code: ../build
+      Environment:
+        Variables:
+          BEDROCK_MODEL_ID: !Ref BedrockModelId
+          CACHE_TABLE: !Ref CacheTable
+          SITE_BUCKET: !Ref SiteBucket
+          FEED_KEY: feed.json
+          CONTACT_EMAIL: !Ref ContactEmail
+          MAX_NEW_PER_RUN: "60"
+          SLACK_SECRET_ID: !Ref SlackSecret
+          SITE_URL: !Ref SiteUrl
+          DIGEST_INTERVAL_MIN: "30"
+          DIGEST_BURST: "12"
+
+  # --- Schedule: invoke the function every few minutes ------------------------
+  Schedule:
+    Type: AWS::Events::Rule
+    Properties:
+      ScheduleExpression: !Ref ScheduleExpression
+      State: ENABLED
+      Targets:
+        - Id: rewrite
+          Arn: !GetAtt RewriteFunction.Arn
+
+  SchedulePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref RewriteFunction
+      Action: lambda:InvokeFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt Schedule.Arn
+
+  # --- Front-end host: security group (the Okta-bypass keystone) --------------
+  # Accepts the app port ONLY from the ALB security group by id - never a CIDR.
+  # This is what makes the Okta gate impossible to bypass at the network layer.
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Weather Machine front-end host - app port from ALB SG only
+      VpcId: !Ref VpcId
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: !Ref WebAppPort
+          ToPort: !Ref WebAppPort
+          SourceSecurityGroupId: !Ref AlbSecurityGroupId
+          Description: App port from the ALB security group only
+      SecurityGroupEgress:
+        - IpProtocol: -1
+          CidrIp: 0.0.0.0/0
+          Description: Outbound for S3 / Bedrock / package install
+
+  # --- Front-end host: instance role (SSM-managed, scoped reads) --------------
+  WebInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: { Service: ec2.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        # SSM-only access (no SSH key pair, no inbound 22). Most-forgotten step.
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+      Policies:
+        - PolicyName: weather-machine-web
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Sid: ReadFeed
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "${SiteBucket.Arn}/feed.json"
+              - Sid: ReadAssets
+                Effect: Allow
+                Action: s3:GetObject
+                Resource: !Sub "arn:aws:s3:::${AssetsBucket}/*"
+
+  WebInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles: [!Ref WebInstanceRole]
+
+  WebInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref LatestAmiId
+      IamInstanceProfile: !Ref WebInstanceProfile
+      SubnetId: !Ref SubnetId
+      SecurityGroupIds: [!Ref WebSecurityGroup]
+      Tags:
+        - Key: Name
+          Value: weather-machine-web
+      UserData:
+        Fn::Base64: !Sub |
+          #!/usr/bin/env bash
+          set -euxo pipefail
+
+          # Dedicated service user; no login shell.
+          id weatherweb &>/dev/null || useradd --system --no-create-home --shell /usr/sbin/nologin weatherweb
+
+          install -d -o weatherweb -g weatherweb /opt/weather-machine
+          install -d /etc/weather-machine
+
+          # Pull the front-end bundle (site/ + feed-sync.sh + systemd units).
+          aws s3 cp "s3://${AssetsBucket}/${AssetsKey}" /tmp/web-assets.tar.gz --region ${AWS::Region}
+          tar -xzf /tmp/web-assets.tar.gz -C /opt/weather-machine
+          chown -R weatherweb:weatherweb /opt/weather-machine
+          chmod +x /opt/weather-machine/feed-sync.sh
+
+          # Runtime config for both units.
+          cat > /etc/weather-machine/web.env <<EOF
+          SITE_BUCKET=${SiteBucket}
+          AWS_REGION=${AWS::Region}
+          WM_DOCROOT=/opt/weather-machine/site
+          WM_HOST=0.0.0.0
+          WM_PORT=${WebAppPort}
+          FEED_KEY=feed.json
+          EOF
+
+          # Install + start the units (idempotent on re-bootstrap).
+          install -m 0644 /opt/weather-machine/systemd/weather-machine-web.service /etc/systemd/system/
+          install -m 0644 /opt/weather-machine/systemd/feed-sync.service /etc/systemd/system/
+          install -m 0644 /opt/weather-machine/systemd/feed-sync.timer /etc/systemd/system/
+          systemctl daemon-reload
+          systemctl enable --now weather-machine-web.service
+          systemctl enable --now feed-sync.timer
+          systemctl start feed-sync.service || true
+
+Outputs:
+  SiteBucket:
+    Description: Private bucket the Lambda writes feed.json into and the EC2 host reads.
+    Value: !Ref SiteBucket
+  FunctionName:
+    Value: !Ref RewriteFunction
+  SlackSecretArn:
+    Description: Put the real Slack webhook URL here (see DEPLOYMENT.md).
+    Value: !Ref SlackSecret
+  WebInstanceId:
+    Description: Front-end host - register it in the ALB target group on the app port.
+    Value: !Ref WebInstance
+  WebSecurityGroupId:
+    Description: Host SG - confirm it accepts the app port only from the ALB SG.
+    Value: !Ref WebSecurityGroup
+  WebAppPort:
+    Value: !Ref WebAppPort
+  NextSteps:
+    Description: Builder-provisioned items remaining.
+    Value: "Register WebInstanceId in an ALB target group (health '/'), add the HTTPS:443 authenticate-oidc listener rule, point DNS at the ALB, and store the Slack webhook in SlackSecretArn."

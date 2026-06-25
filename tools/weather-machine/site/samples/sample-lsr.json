@@ -1,0 +1,1025 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "1",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Sussex",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Trees down near Thomas Lane. Time estimated by radar.",
+        "city": "4 NNW Pellettown",
+        "source": "Law Enforcement",
+        "unit": null,
+        "valid": "2026-06-12T02:10:00Z",
+        "lon": -74.7,
+        "lat": 41.22,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7,
+          41.22
+        ]
+      }
+    },
+    {
+      "id": "82",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 44.0,
+        "county": "ANZ451",
+        "typetext": "MARINE TSTM WIND",
+        "state": "NJ",
+        "remark": "WeatherFlow Station XLBI.",
+        "city": "1 SSE Bay Side",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T21:59:00Z",
+        "lon": -74.21,
+        "lat": 39.66,
+        "qualifier": "M",
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "44"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.21,
+          39.66
+        ]
+      }
+    },
+    {
+      "id": "206",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Burlington",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Wires down near Big Hill Road in Southampton Township. Time estimated from radar.",
+        "city": "1 NNE Leisuretowne",
+        "source": "Newspaper",
+        "unit": null,
+        "valid": "2026-06-12T20:46:00Z",
+        "lon": -74.7,
+        "lat": 39.9,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.7,
+          39.9
+        ]
+      }
+    },
+    {
+      "id": "248",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Monroe",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Trees down near the intersection of PA-940 and Tanglewood Drive. Time estimated by radar.",
+        "city": "2 E Pocono Pines",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T00:59:00Z",
+        "lon": -75.43,
+        "lat": 41.11,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.43,
+          41.11
+        ]
+      }
+    },
+    {
+      "id": "303",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Berks",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Tree down near Bellemans Church Rd & Railroad Rd. Power is out in the area.",
+        "city": "1 WNW Leesport",
+        "source": "Public",
+        "unit": null,
+        "valid": "2026-06-12T00:33:00Z",
+        "lon": -75.98,
+        "lat": 40.46,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.98,
+          40.46
+        ]
+      }
+    },
+    {
+      "id": "413",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Hunterdon",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Trees down in Readington Township. Time estimated from radar.",
+        "city": "1 NE Three Bridges",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T20:21:00Z",
+        "lon": -74.79,
+        "lat": 40.53,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.79,
+          40.53
+        ]
+      }
+    },
+    {
+      "id": "437",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Morris",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Reports of numerous trees and wires down across the town of Mendham.",
+        "city": "Mendham",
+        "source": "Trained Spotter",
+        "unit": null,
+        "valid": "2026-06-12T01:34:00Z",
+        "lon": -74.6,
+        "lat": 40.78,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.6,
+          40.78
+        ]
+      }
+    },
+    {
+      "id": "475",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Berks",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Tree Down on Roadway at PA-183 and Four Point Rd.",
+        "city": "2 NW Strausstown",
+        "source": "Public",
+        "unit": null,
+        "valid": "2026-06-12T00:05:00Z",
+        "lon": -76.21,
+        "lat": 40.52,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.21,
+          40.52
+        ]
+      }
+    },
+    {
+      "id": "477",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 41.0,
+        "county": "ANZ430",
+        "typetext": "MARINE TSTM WIND",
+        "state": "DE",
+        "remark": "Lower Alloways Creek Mesonet.",
+        "city": "2 ESE Port Penn",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-10T21:45:00Z",
+        "lon": -75.54,
+        "lat": 39.51,
+        "qualifier": "M",
+        "product_id": "202606102149-KPHI-NWUS51-LSRPHI",
+        "st": "DE",
+        "magnitude": "41"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54,
+          39.51
+        ]
+      }
+    },
+    {
+      "id": "610",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Berks",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Tree down on Dundore Rd.",
+        "city": "1 WSW North Heidelberg",
+        "source": "Public",
+        "unit": null,
+        "valid": "2026-06-12T00:17:00Z",
+        "lon": -76.15,
+        "lat": 40.39,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.15,
+          40.39
+        ]
+      }
+    },
+    {
+      "id": "693",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Queen Anne's",
+        "typetext": "TSTM WND DMG",
+        "state": "MD",
+        "remark": "Tree down on wires. Time estimated by radar.",
+        "city": "2 SSW Chester",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T01:20:00Z",
+        "lon": -76.3,
+        "lat": 38.95,
+        "qualifier": null,
+        "product_id": "202606120328-KPHI-NWUS51-LSRPHI",
+        "st": "MD",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.3,
+          38.95
+        ]
+      }
+    },
+    {
+      "id": "829",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Burlington",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Multiple trees down on Branin Road in Medford. Time estimated from radar.",
+        "city": "1 ENE Medford",
+        "source": "Newspaper",
+        "unit": null,
+        "valid": "2026-06-12T20:28:00Z",
+        "lon": -74.81,
+        "lat": 39.89,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.81,
+          39.89
+        ]
+      }
+    },
+    {
+      "id": "859",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "G",
+        "magf": 62.0,
+        "county": "Queen Anne's",
+        "typetext": "TSTM WND GST",
+        "state": "MD",
+        "remark": "Bay Bridge WxFlow site.",
+        "city": "1 WSW Stevensville",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-13T00:44:00Z",
+        "lon": -76.33,
+        "lat": 38.98,
+        "qualifier": "M",
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "MD",
+        "magnitude": "62"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.33,
+          38.98
+        ]
+      }
+    },
+    {
+      "id": "882",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Burlington",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Tree down at Sooy Place Road and South Park Road in Tabernacle. Time estimated from radar.",
+        "city": "3 ESE Leisuretowne",
+        "source": "Newspaper",
+        "unit": null,
+        "valid": "2026-06-12T20:50:00Z",
+        "lon": -74.65,
+        "lat": 39.87,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.65,
+          39.87
+        ]
+      }
+    },
+    {
+      "id": "889",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 39.0,
+        "county": "ANZ455",
+        "typetext": "MARINE TSTM WIND",
+        "state": "DE",
+        "remark": "KDEOCEAN76 Wunderground Station.",
+        "city": "2 SW Indian River Inlet",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-13T02:34:00Z",
+        "lon": -75.09,
+        "lat": 38.58,
+        "qualifier": "M",
+        "product_id": "202606130345-KPHI-NWUS51-LSRPHI",
+        "st": "DE",
+        "magnitude": "39"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.09,
+          38.58
+        ]
+      }
+    },
+    {
+      "id": "987",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Hunterdon",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Corrects previous tstm wnd dmg report from 2 SSE Raritan Twp. Trees down in Raritan Township. Time estimated from radar.",
+        "city": "2 SSE Raritan Twp",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T20:21:00Z",
+        "lon": -74.86,
+        "lat": 40.47,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.86,
+          40.47
+        ]
+      }
+    },
+    {
+      "id": "1210",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Queen Anne's",
+        "typetext": "TSTM WND DMG",
+        "state": "MD",
+        "remark": "Large tree limb down on wires. Time estimated by radar.",
+        "city": "Chester",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T01:20:00Z",
+        "lon": -76.3,
+        "lat": 38.97,
+        "qualifier": null,
+        "product_id": "202606120328-KPHI-NWUS51-LSRPHI",
+        "st": "MD",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.3,
+          38.97
+        ]
+      }
+    },
+    {
+      "id": "1311",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 52.0,
+        "county": "Ocean",
+        "typetext": "MARINE TSTM WIND",
+        "state": "NJ",
+        "remark": "NJWxNet Station NJ11 Harvey Cedars.",
+        "city": "Harvey Cedars",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T22:00:00Z",
+        "lon": -74.14,
+        "lat": 39.7,
+        "qualifier": "M",
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "52"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.14,
+          39.7
+        ]
+      }
+    },
+    {
+      "id": "1572",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Queen Anne's",
+        "typetext": "TSTM WND DMG",
+        "state": "MD",
+        "remark": "Widespread reports of trees and wires down across the northern portion of Kent Island. Time estimated from radar.",
+        "city": "1 NNW Stevensville",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-13T00:52:00Z",
+        "lon": -76.31,
+        "lat": 39.0,
+        "qualifier": null,
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "MD",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.31,
+          39.0
+        ]
+      }
+    },
+    {
+      "id": "1621",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Carbon",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Downed trees. Time estimated by radar.",
+        "city": "2 WSW Blakeslee",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T00:52:00Z",
+        "lon": -75.62,
+        "lat": 41.08,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.62,
+          41.08
+        ]
+      }
+    },
+    {
+      "id": "1630",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "H",
+        "magf": 0.25,
+        "county": "Hunterdon",
+        "typetext": "HAIL",
+        "state": "NJ",
+        "remark": null,
+        "city": "1 SSE Bartles Corners",
+        "source": "Trained Spotter",
+        "unit": "Inch",
+        "valid": "2026-06-12T20:19:00Z",
+        "lon": -74.85,
+        "lat": 40.53,
+        "qualifier": "M",
+        "product_id": "202606130137-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "0.25"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.85,
+          40.53
+        ]
+      }
+    },
+    {
+      "id": "1691",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "G",
+        "magf": 60.0,
+        "county": "Queen Anne's",
+        "typetext": "TSTM WND GST",
+        "state": "MD",
+        "remark": "Bay Bridge mesonet.",
+        "city": "1 WSW Stevensville",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T01:04:00Z",
+        "lon": -76.33,
+        "lat": 38.99,
+        "qualifier": "M",
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "MD",
+        "magnitude": "60"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.33,
+          38.99
+        ]
+      }
+    },
+    {
+      "id": "1947",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Philadelphia",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Reports of trees and wires down around Mount Airy. Time estimated from radar.",
+        "city": "Mount Airy",
+        "source": "Emergency Mngr",
+        "unit": null,
+        "valid": "2026-06-12T02:25:00Z",
+        "lon": -75.19,
+        "lat": 40.06,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.19,
+          40.06
+        ]
+      }
+    },
+    {
+      "id": "2248",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Hunterdon",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Trees down in Raritan Township. Time estimated from radar.",
+        "city": "2 SSE Raritan Twp",
+        "source": "Public",
+        "unit": null,
+        "valid": "2026-06-12T20:21:00Z",
+        "lon": -74.86,
+        "lat": 40.47,
+        "qualifier": null,
+        "product_id": "202606122101-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.86,
+          40.47
+        ]
+      }
+    },
+    {
+      "id": "2382",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Monroe",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Downed trees. Time estimated by radar.",
+        "city": "1 SW Blakeslee",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T00:52:00Z",
+        "lon": -75.6,
+        "lat": 41.09,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.6,
+          41.09
+        ]
+      }
+    },
+    {
+      "id": "2439",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Lehigh",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Wires reported down. Time estimated by radar.",
+        "city": "2 S Allentown",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T00:59:00Z",
+        "lon": -75.47,
+        "lat": 40.58,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.47,
+          40.58
+        ]
+      }
+    },
+    {
+      "id": "2481",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Carbon",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Downed trees. Time estimated by radar.",
+        "city": "1 SSE Lower Towamensing",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T01:08:00Z",
+        "lon": -75.52,
+        "lat": 40.83,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.52,
+          40.83
+        ]
+      }
+    },
+    {
+      "id": "2516",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 39.0,
+        "county": "Gloucester",
+        "typetext": "MARINE TSTM WIND",
+        "state": "NJ",
+        "remark": "Logan Twp mesonet.",
+        "city": "1 WNW Logan Twp.",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T02:30:00Z",
+        "lon": -75.37,
+        "lat": 39.81,
+        "qualifier": "M",
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "39"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.37,
+          39.81
+        ]
+      }
+    },
+    {
+      "id": "2572",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Sussex",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Downed trees near the intersection of Libertyville Rd and County Road 519. Time estimated by radar.",
+        "city": "2 WNW Wantage Twp",
+        "source": "Law Enforcement",
+        "unit": null,
+        "valid": "2026-06-12T02:15:00Z",
+        "lon": -74.67,
+        "lat": 41.25,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.67,
+          41.25
+        ]
+      }
+    },
+    {
+      "id": "2666",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Berks",
+        "typetext": "TSTM WND DMG",
+        "state": "PA",
+        "remark": "Tree down blocking roadway. Time estimated.",
+        "city": "2 NNE Penn Twp",
+        "source": "Public",
+        "unit": null,
+        "valid": "2026-06-12T00:23:00Z",
+        "lon": -76.06,
+        "lat": 40.49,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "PA",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -76.06,
+          40.49
+        ]
+      }
+    },
+    {
+      "id": "2943",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 43.0,
+        "county": "Salem",
+        "typetext": "MARINE TSTM WIND",
+        "state": "NJ",
+        "remark": "Lower Alloways Creek mesonet.",
+        "city": "4 SSW Elsinboro Twp",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T02:20:00Z",
+        "lon": -75.54,
+        "lat": 39.49,
+        "qualifier": "M",
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "43"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.54,
+          39.49
+        ]
+      }
+    },
+    {
+      "id": "2964",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 39.0,
+        "county": "ANZ430",
+        "typetext": "MARINE TSTM WIND",
+        "state": "NJ",
+        "remark": "Fortescue Mesonet.",
+        "city": "1 SW Fortescue",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T02:35:00Z",
+        "lon": -75.18,
+        "lat": 39.23,
+        "qualifier": "M",
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": "39"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.18,
+          39.23
+        ]
+      }
+    },
+    {
+      "id": "3036",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "M",
+        "magf": 48.0,
+        "county": "New Castle",
+        "typetext": "MARINE TSTM WIND",
+        "state": "DE",
+        "remark": "Odessa mesonet.",
+        "city": "1 S Odessa",
+        "source": "Mesonet",
+        "unit": "MPH",
+        "valid": "2026-06-12T02:04:00Z",
+        "lon": -75.66,
+        "lat": 39.44,
+        "qualifier": "M",
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "DE",
+        "magnitude": "48"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -75.66,
+          39.44
+        ]
+      }
+    },
+    {
+      "id": "3060",
+      "type": "Feature",
+      "properties": {
+        "wfo": "PHI",
+        "type": "D",
+        "magf": null,
+        "county": "Morris",
+        "typetext": "TSTM WND DMG",
+        "state": "NJ",
+        "remark": "Several reports of trees and wires down in Morristown. Time estimated from radar.",
+        "city": "Morristown",
+        "source": "911 Call Center",
+        "unit": null,
+        "valid": "2026-06-12T01:49:00Z",
+        "lon": -74.48,
+        "lat": 40.8,
+        "qualifier": null,
+        "product_id": "202606120646-KPHI-NWUS51-LSRPHI",
+        "st": "NJ",
+        "magnitude": ""
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -74.48,
+          40.8
+        ]
+      }
+    }
+  ]
+}
