@@ -93,7 +93,7 @@ the README's claims. Answer each, citing the file/line evidence.
 | 5 | **AI inference** — does a model read/summarize/classify? | Model-client imports and call sites |
 | 6 | **Secrets** — what credentials does it hold, and where? | `.env`, `os.environ`, hardcoded strings, config files, `*_KEY`, `*_TOKEN`, `*_SECRET` |
 | 7 | **Persistence/output** — where does work land? | File writes, S3 puts, DB inserts, Slack/webhook posts, a served page |
-| 8 | **Audience** — who is the consumer? | A logged-in human (UI), the public (open page/feed), or a machine (data/notifications) |
+| 8 | **Audience** — who is the *intended* consumer? | A logged-in human (UI), the public (open page/feed), or a machine (data/notifications). **Record intended audience and current delivery separately** — a public-looking URL (e.g. a CloudFront/S3 page) may just be how an internal tool is delivered today, not evidence the audience is public. When the code can't tell you, confirm intent with the operator. |
 
 Output of this phase is an **Inventory block** in the report — the factual basis everything
 downstream rests on.
@@ -113,6 +113,13 @@ classifier. Answer in order; the first strong signal usually decides it.
 | 4 | Both a visited UI *and* triggered/AI backend? | **Yes → Pattern C** (hybrid). |
 | 5 | Processes data with a model? | **Yes →** backend is **B** (Lambda + Bedrock); prefer Bedrock role auth over a key. |
 | 6 | Holds a genuine secret that a role can't replace? | **Yes →** Secrets Manager (SYS-1623) is in scope. |
+
+**Audience ≠ delivery.** Question 1 is about the *intended* audience, not how the tool
+happens to be served. A public CloudFront/S3 URL, an open port, or an internet-routable
+address is a *delivery mechanism* — it does **not** by itself make the audience public. An
+internal tool can sit (mis-built) on a public surface; that's a Pattern A/C **finding to
+fix**, not a Pattern D verdict. Before answering **Yes** and routing the tool off-platform,
+confirm intent with the operator. When in doubt, treat it as internal and continue.
 
 A tool can resolve to **more than one pattern** — that's expected, not a failure. A gated
 dashboard fed by an AI listener is **B + C**. A tool with a public feed *and* an internal
