@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>How it works — The Philadelphia Weather Machine</title>
+  <meta name="description"
+    content="Methodology and sources for The Philadelphia Weather Machine: what it does, where the data comes from, and how the plain-language summaries are kept faithful." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Saira+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a class="nameplate" href="./" aria-label="The Philadelphia Weather Machine — home">
+        <img src="pwn-logo-banner.png"
+          alt="The Philadelphia Weather Machine — a brass-and-gauges weather banner with the Philadelphia skyline" />
+      </a>
+      <p class="tagline">How this works — methodology and sources.</p>
+      <p class="masthead-links"><a href="./">← Back to the live feed</a></p>
+    </div>
+  </header>
+
+  <main class="doc-main">
+    <article class="doc">
+
+      <p class="lede">
+        This page shows National Weather Service alerts and on-the-ground storm
+        reports for the Philadelphia region in close to real time, and rewrites
+        the official, jargon-filled wording into plain language so it's faster to
+        read in a hurry. It is an independent project and is <strong>not</strong>
+        an official National Weather Service product — always follow official NWS
+        and local emergency guidance.
+      </p>
+
+      <h2>What you're looking at</h2>
+      <p>
+        The left column is a live feed: active watches, warnings and advisories
+        for the NWS Mount Holly office, followed by local storm reports (hail,
+        wind, flooding, tornado sightings) from the past 24 hours. The right side
+        is a map of the same information, with an optional precipitation radar
+        overlay.
+      </p>
+      <p>
+        Each alert and report shows a short plain-language summary. The exact,
+        official National Weather Service wording is always one tap away under
+        “Show official NWS text.”
+      </p>
+
+      <h2>Where the information comes from</h2>
+      <p>Everything here is built from free, public, official or well-established sources:</p>
+      <ul>
+        <li><strong>Alerts</strong> — the National Weather Service alerts feed
+          (<a href="https://api.weather.gov" rel="noopener">api.weather.gov</a>),
+          for the Mount Holly / Philadelphia (PHI) forecast office.</li>
+        <li><strong>Storm reports</strong> — the Iowa Environmental Mesonet
+          (<a href="https://mesonet.agron.iastate.edu" rel="noopener">IEM</a>),
+          which collects the NWS local storm reports.</li>
+        <li><strong>Watch and zone areas</strong> — official NWS county and zone
+          boundaries, used to draw watch areas on the map.</li>
+        <li><strong>Radar</strong> — <a href="https://www.rainviewer.com" rel="noopener">RainViewer</a>,
+          a precipitation radar service.</li>
+        <li><strong>Base map</strong> — <a href="https://www.openstreetmap.org" rel="noopener">OpenStreetMap</a>.</li>
+      </ul>
+      <p>
+        The page refreshes every few minutes, so the information tracks the
+        official sources closely. Alerts drop off the moment they expire, and
+        storm reports age out after 24 hours.
+      </p>
+
+      <h2>How the plain-language summaries are written</h2>
+      <p>
+        Official alerts are written for precision, not speed-reading — they're
+        full of abbreviations (“TSTM WND GST”), capitalized headers and technical
+        phrasing. We use an artificial-intelligence model (Anthropic's Claude) to
+        rewrite that <em>wording</em> into plain English.
+      </p>
+      <p>
+        The single most important rule: <strong>the rewrite must not change the
+        facts.</strong> Here's how that's enforced:
+      </p>
+      <ul>
+        <li><strong>Only the wording is simplified.</strong> The location, the
+          times, the issuing office, the severity and any measurements are taken
+          straight from the official data and shown unchanged — the model never
+          gets to alter them.</li>
+        <li><strong>Numbers are protected.</strong> Every number, measurement,
+          time and place in a summary must already appear in the original. An
+          automatic check rejects any summary that introduces a figure that
+          wasn't there (a made-up wind speed or hail size), and in that case the
+          official text is shown instead.</li>
+        <li><strong>The official text is always available.</strong> Every card
+          links to the exact National Weather Service wording.</li>
+        <li><strong>AI summaries are labeled.</strong> Anything rewritten by the
+          model is marked “AI-simplified.” The official event name (for example,
+          “Tornado Warning”) is never changed.</li>
+      </ul>
+      <p class="doc-note">
+        AI can still make mistakes. The summaries are a convenience to help you
+        read faster — they are not the official record. For anything that affects
+        your safety, read the official NWS text and follow official guidance.
+      </p>
+
+      <h2>What's on the map</h2>
+      <ul>
+        <li><strong>Warning polygons</strong> — the precise areas under a
+          storm-based warning (tornado, severe thunderstorm, flash flood), shown
+          as solid, colored shapes. These come from the Mount Holly office and
+          four neighboring offices, so you can see severe weather just outside the
+          immediate area too. Tap a shape to see which office issued it.</li>
+        <li><strong>Watch areas</strong> — the broader “be prepared” zones, drawn
+          as faint dashed outlines <em>beneath</em> the warnings, so the urgent
+          “happening now” warnings always stand out.</li>
+        <li><strong>Radar</strong> — a precipitation overlay you can turn on or
+          off with the “Radar” button; your choice is remembered.</li>
+        <li><strong>Storm-report dots</strong> — points where something was
+          actually observed or measured.</li>
+      </ul>
+
+      <h2>What the colors mean</h2>
+      <p>
+        Alerts are colored by severity, a rating the National Weather Service
+        assigns (we don't decide it):
+      </p>
+      <ul>
+        <li><strong>Extreme</strong> (purple) — extraordinary threat to life or property.</li>
+        <li><strong>Severe</strong> (red) — significant threat to life or property.</li>
+        <li><strong>Moderate</strong> (amber) — possible threat to life or property.</li>
+        <li><strong>Minor</strong> (blue) — minimal to no known threat.</li>
+      </ul>
+      <p>
+        The palette is chosen to stay distinguishable for colorblind readers and
+        to meet contrast standards.
+      </p>
+
+      <h2>The area we cover</h2>
+      <p>
+        The text feed covers the National Weather Service <strong>Mount Holly,
+        NJ</strong> office, whose forecast area includes Philadelphia, the
+        surrounding Pennsylvania counties, much of New Jersey, Delaware and part
+        of Maryland. The map widens that view to also show warning polygons and
+        watches from the neighboring New York, State College, Binghamton and
+        Baltimore/Washington offices.
+      </p>
+
+      <h2>Important limits</h2>
+      <ul>
+        <li>This is for <strong>situational awareness only</strong>. It is not an
+          official source and not a substitute for NWS alerts or local emergency
+          instructions.</li>
+        <li>Not every alert appears as a shape on the map. Short-fuse warnings
+          carry a precise polygon; many advisories are issued for whole zones and
+          appear in the feed list rather than as a drawn area.</li>
+        <li>Radar is an estimate of precipitation, not ground truth, and can lag
+          or contain artifacts.</li>
+        <li>Data can occasionally be delayed or incomplete if an upstream source
+          is slow.</li>
+      </ul>
+
+      <h2>Why this exists</h2>
+      <p>
+        Official weather alerts are accurate but hard to read quickly, especially
+        on a phone during fast-moving weather. The goal here is to make that
+        information clearer and faster to scan for the public — without changing
+        what it says — while keeping the official wording always within reach.
+      </p>
+
+      <p class="doc-back"><a href="./">← Back to the live feed</a></p>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="sources">
+        <strong>Sources</strong>
+        Alerts — <a href="https://api.weather.gov" rel="noopener">NWS api.weather.gov</a> ·
+        Storm reports — <a href="https://mesonet.agron.iastate.edu" rel="noopener">Iowa Environmental Mesonet</a> ·
+        Radar — <a href="https://www.rainviewer.com" rel="noopener">RainViewer</a> ·
+        Plain-language summaries — Anthropic Claude.
+      </p>
+      <p class="disclaimer">
+        For situational awareness only. Always follow official NWS and local
+        emergency guidance. Data may lag or be incomplete.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>

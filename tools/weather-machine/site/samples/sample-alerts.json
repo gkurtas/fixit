@@ -1,0 +1,401 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.84599e9f619279f73f773a5c8dc68ebb85d964f9.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -99.35,
+              41.77
+            ],
+            [
+              -99.49,
+              41.92
+            ],
+            [
+              -99.21,
+              42.09
+            ],
+            [
+              -98.9,
+              41.95
+            ],
+            [
+              -99.35,
+              41.77
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.84599e9f619279f73f773a5c8dc68ebb85d964f9.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.84599e9f619279f73f773a5c8dc68ebb85d964f9.001.1",
+        "areaDesc": "Garfield, NE; Loup, NE",
+        "geocode": {
+          "SAME": [
+            "031071",
+            "031115"
+          ],
+          "UGC": [
+            "NEC071",
+            "NEC115"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/county/NEC071",
+          "https://api.weather.gov/zones/county/NEC115"
+        ],
+        "references": [
+          {
+            "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.d017db3cfcbe54625261631fe1b7ad341b302b95.001.1",
+            "identifier": "urn:oid:2.49.0.1.840.0.d017db3cfcbe54625261631fe1b7ad341b302b95.001.1",
+            "sender": "w-nws.webmaster@noaa.gov",
+            "sent": "2026-06-13T04:57:00-05:00"
+          }
+        ],
+        "sent": "2026-06-13T05:04:00-05:00",
+        "effective": "2026-06-13T05:04:00-05:00",
+        "onset": "2026-06-13T05:04:00-05:00",
+        "expires": "2026-06-13T05:45:00-05:00",
+        "ends": "2026-06-13T05:45:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Observed",
+        "urgency": "Immediate",
+        "event": "Severe Thunderstorm Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS North Platte NE",
+        "headline": "Severe Thunderstorm Warning issued June 13 at 5:04AM CDT until June 13 at 5:45AM CDT by NWS North Platte NE",
+        "description": "At 504 AM CDT, a severe thunderstorm was located near Calamus\nReservoir State Recreation Area, or 10 miles northeast of Taylor,\nmoving northeast at 20 mph.\n\nHAZARD...Golf ball size hail.\n\nSOURCE...Radar indicated.\n\nIMPACT...People and animals outdoors will be injured. Expect damage\nto roofs, siding, windows, and vehicles.\n\nLocations impacted include...\nCalamus Reservoir State Recreation Area, Homestead Knolls Campground,\nVirginia Smith Dam, Horseshoe Bend Lake, Hannamon Bayou Campground,\nNunda Shoal Campground, Deverre, and Valley View Flat Campground.\n\nThis includes Highway 183 between mile markers 127 and 138.",
+        "instruction": "For your protection move to an interior room on the lowest floor of a\nbuilding.",
+        "response": "Shelter",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "SVSLBF"
+          ],
+          "WMOidentifier": [
+            "WWUS53 KLBF 131004"
+          ],
+          "NWSheadline": [
+            "A SEVERE THUNDERSTORM WARNING REMAINS IN EFFECT UNTIL 545 AM CDT FOR EASTERN LOUP AND NORTHWESTERN GARFIELD COUNTIES"
+          ],
+          "eventMotionDescription": [
+            "2026-06-13T10:04:00-00:00...storm...235DEG...17KT...41.91,-99.3"
+          ],
+          "windThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxWindGust": [
+            "Up to 50 MPH"
+          ],
+          "hailThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxHailSize": [
+            "1.75"
+          ],
+          "thunderstormDamageThreat": [
+            "CONSIDERABLE"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "EAS-ORG": [
+            "WXR"
+          ],
+          "VTEC": [
+            "/O.CON.KLBF.SV.W.0092.000000T0000Z-260613T1045Z/"
+          ],
+          "eventEndingTime": [
+            "2026-06-13T05:45:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "SVS"
+          ],
+          "NationalWeatherService": [
+            "SVW"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f0058bdf58709cad9caf42b817351c6f2b61ac19.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -98.59,
+              41.74
+            ],
+            [
+              -98.56,
+              41.49
+            ],
+            [
+              -99.02,
+              41.57
+            ],
+            [
+              -99.01,
+              41.74
+            ],
+            [
+              -98.59,
+              41.74
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.f0058bdf58709cad9caf42b817351c6f2b61ac19.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.f0058bdf58709cad9caf42b817351c6f2b61ac19.001.1",
+        "areaDesc": "Greeley, NE; Valley, NE",
+        "geocode": {
+          "SAME": [
+            "031077",
+            "031175"
+          ],
+          "UGC": [
+            "NEC077",
+            "NEC175"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/county/NEC077",
+          "https://api.weather.gov/zones/county/NEC175"
+        ],
+        "references": [
+          {
+            "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.bf2d59799fc8eeb88c73a2af07eda19aab48b870.001.1",
+            "identifier": "urn:oid:2.49.0.1.840.0.bf2d59799fc8eeb88c73a2af07eda19aab48b870.001.1",
+            "sender": "w-nws.webmaster@noaa.gov",
+            "sent": "2026-06-13T04:49:00-05:00"
+          }
+        ],
+        "sent": "2026-06-13T05:02:00-05:00",
+        "effective": "2026-06-13T05:02:00-05:00",
+        "onset": "2026-06-13T05:02:00-05:00",
+        "expires": "2026-06-13T05:30:00-05:00",
+        "ends": "2026-06-13T05:30:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Observed",
+        "urgency": "Immediate",
+        "event": "Severe Thunderstorm Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS Hastings NE",
+        "headline": "Severe Thunderstorm Warning issued June 13 at 5:02AM CDT until June 13 at 5:30AM CDT by NWS Hastings NE",
+        "description": "At 502 AM CDT, a severe thunderstorm was located near Ord, moving\neast at 40 mph.\n\nHAZARD...60 mph wind gusts and half dollar size hail.\n\nSOURCE...Radar indicated.\n\nIMPACT...Hail damage to vehicles is expected. Expect wind damage to\nroofs, siding, and trees.\n\nThis severe thunderstorm will remain over mainly rural areas of\nnorthwestern Greeley and northeastern Valley Counties.",
+        "instruction": "For your protection move to an interior room on the lowest floor of a\nbuilding.",
+        "response": "Shelter",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "SVSGID"
+          ],
+          "WMOidentifier": [
+            "WWUS53 KGID 131002"
+          ],
+          "NWSheadline": [
+            "A SEVERE THUNDERSTORM WARNING REMAINS IN EFFECT UNTIL 530 AM CDT FOR NORTHWESTERN GREELEY AND NORTHEASTERN VALLEY COUNTIES"
+          ],
+          "eventMotionDescription": [
+            "2026-06-13T10:02:00-00:00...storm...273DEG...33KT...41.67,-98.85"
+          ],
+          "windThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxWindGust": [
+            "60 MPH"
+          ],
+          "hailThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxHailSize": [
+            "1.25"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "EAS-ORG": [
+            "WXR"
+          ],
+          "VTEC": [
+            "/O.CON.KGID.SV.W.0182.000000T0000Z-260613T1030Z/"
+          ],
+          "eventEndingTime": [
+            "2026-06-13T05:30:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "SVS"
+          ],
+          "NationalWeatherService": [
+            "SVW"
+          ]
+        }
+      }
+    },
+    {
+      "id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.626a5b6b2748deb6088219939631bd5c8c3f1007.001.1",
+      "type": "Feature",
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [
+          [
+            [
+              -99.94,
+              41.75
+            ],
+            [
+              -100.05,
+              41.91
+            ],
+            [
+              -99.53,
+              42.15
+            ],
+            [
+              -99.36,
+              41.91
+            ],
+            [
+              -99.94,
+              41.75
+            ]
+          ]
+        ]
+      },
+      "properties": {
+        "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.626a5b6b2748deb6088219939631bd5c8c3f1007.001.1",
+        "@type": "wx:Alert",
+        "id": "urn:oid:2.49.0.1.840.0.626a5b6b2748deb6088219939631bd5c8c3f1007.001.1",
+        "areaDesc": "Blaine, NE; Loup, NE; Rock, NE",
+        "geocode": {
+          "SAME": [
+            "031009",
+            "031115",
+            "031149"
+          ],
+          "UGC": [
+            "NEC009",
+            "NEC115",
+            "NEC149"
+          ]
+        },
+        "affectedZones": [
+          "https://api.weather.gov/zones/county/NEC009",
+          "https://api.weather.gov/zones/county/NEC115",
+          "https://api.weather.gov/zones/county/NEC149"
+        ],
+        "references": [
+          {
+            "@id": "https://api.weather.gov/alerts/urn:oid:2.49.0.1.840.0.57bcf72b4bcedb4ab98d5647cca1804ba73a3e6d.001.1",
+            "identifier": "urn:oid:2.49.0.1.840.0.57bcf72b4bcedb4ab98d5647cca1804ba73a3e6d.001.1",
+            "sender": "w-nws.webmaster@noaa.gov",
+            "sent": "2026-06-13T04:33:00-05:00"
+          }
+        ],
+        "sent": "2026-06-13T05:00:00-05:00",
+        "effective": "2026-06-13T05:00:00-05:00",
+        "onset": "2026-06-13T05:00:00-05:00",
+        "expires": "2026-06-13T05:15:00-05:00",
+        "ends": "2026-06-13T05:15:00-05:00",
+        "status": "Actual",
+        "messageType": "Update",
+        "category": "Met",
+        "severity": "Severe",
+        "certainty": "Observed",
+        "urgency": "Immediate",
+        "event": "Severe Thunderstorm Warning",
+        "sender": "w-nws.webmaster@noaa.gov",
+        "senderName": "NWS North Platte NE",
+        "headline": "Severe Thunderstorm Warning issued June 13 at 5:00AM CDT until June 13 at 5:15AM CDT by NWS North Platte NE",
+        "description": "At 500 AM CDT, a severe thunderstorm was located 7 miles east of\nBrewster, moving northeast at 20 mph.\n\nHAZARD...Quarter size hail.\n\nSOURCE...Radar indicated.\n\nIMPACT...Damage to vehicles is expected.\n\nLocations impacted include...\nBrewster, Fox Bayou, Almeria Meadow State Wildlife Management Area,\nand Horseshoe Bend Lake.\n\nThis includes Highway 183 between mile markers 134 and 136, and\nbetween mile markers 138 and 152.",
+        "instruction": "For your protection move to an interior room on the lowest floor of a\nbuilding.",
+        "response": "Shelter",
+        "note": null,
+        "parameters": {
+          "AWIPSidentifier": [
+            "SVSLBF"
+          ],
+          "WMOidentifier": [
+            "WWUS53 KLBF 131000"
+          ],
+          "NWSheadline": [
+            "A SEVERE THUNDERSTORM WARNING REMAINS IN EFFECT UNTIL 515 AM CDT FOR SOUTH CENTRAL ROCK...NORTHWESTERN LOUP AND EASTERN BLAINE COUNTIES"
+          ],
+          "eventMotionDescription": [
+            "2026-06-13T10:00:00-00:00...storm...247DEG...20KT...41.91,-99.73"
+          ],
+          "windThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxWindGust": [
+            "Up to 50 MPH"
+          ],
+          "hailThreat": [
+            "RADAR INDICATED"
+          ],
+          "maxHailSize": [
+            "1.00"
+          ],
+          "BLOCKCHANNEL": [
+            "EAS",
+            "NWEM",
+            "CMAS"
+          ],
+          "EAS-ORG": [
+            "WXR"
+          ],
+          "VTEC": [
+            "/O.CON.KLBF.SV.W.0090.000000T0000Z-260613T1015Z/"
+          ],
+          "eventEndingTime": [
+            "2026-06-13T05:15:00-05:00"
+          ]
+        },
+        "scope": "Public",
+        "code": "IPAWSv1.0",
+        "language": "en-US",
+        "web": "http://www.weather.gov",
+        "eventCode": {
+          "SAME": [
+            "SVS"
+          ],
+          "NationalWeatherService": [
+            "SVW"
+          ]
+        }
+      }
+    }
+  ]
+}

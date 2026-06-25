@@ -1,0 +1,27 @@
+[Unit]
+Description=Philadelphia Weather Machine - front-end static server (Pattern A)
+Documentation=https://github.com/inquirer/weather-machine
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=weatherweb
+Group=weatherweb
+EnvironmentFile=/etc/weather-machine/web.env
+ExecStart=/usr/bin/python3 /opt/weather-machine/site/serve.py
+Restart=always
+RestartSec=2
+
+# Hardening - the service only needs to read the docroot and bind its port.
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictAddressFamilies=AF_INET AF_INET6
+LockPersonality=true
+
+[Install]
+WantedBy=multi-user.target

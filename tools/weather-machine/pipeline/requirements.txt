@@ -1,0 +1,5 @@
+# Local rewrite pipeline dependencies.
+# anthropic pulls in pydantic (used for the structured Rewrite output).
+# Install the latest: pip install -U -r pipeline/requirements.txt
+anthropic>=0.69
+requests>=2.31
