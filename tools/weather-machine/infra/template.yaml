@@ -24,36 +24,62 @@ Parameters:
     Default: ""
     Description: Public (Okta-gated) URL of the site, used in Slack links. Set to the ALB/DNS host once known.
 
-  # --- Front-end host inputs (builder supplies the existing network) ----------
+  # --- Deploy mode ------------------------------------------------------------
+  # Backend-only (default) deploys just the Pattern B resources (SiteBucket,
+  # CacheTable, RewriteFunction + role/permission, SlackSecret) for the A2-static
+  # hosting model, where the front-end serves as static files from the shared
+  # landing host. Set to "true" for the A1 dedicated-stack model, which also
+  # stands up the EC2 front-end host, its security group, and instance role (and
+  # then requires the network inputs below).
+  DeployWebHost:
+    Type: String
+    Default: "false"
+    AllowedValues: ["true", "false"]
+    Description: '"true" = also create the A1 dedicated front-end host; "false" = backend only (A2-static).'
+
+  # --- Front-end host inputs (REQUIRED only when DeployWebHost=true) -----------
+  # Typed as String with a "" default so backend-only deploys need not supply
+  # them. (AWS::EC2::*::Id typed parameters reject an empty value, which would
+  # otherwise make a backend-only deploy impossible.)
   VpcId:
-    Type: AWS::EC2::VPC::Id
-    Description: VPC the front-end EC2 host and its security group live in.
+    Type: String
+    Default: ""
+    Description: (A1 only) VPC the front-end EC2 host and its security group live in.
   SubnetId:
-    Type: AWS::EC2::Subnet::Id
-    Description: Subnet for the front-end EC2 host (a private subnet the ALB can reach).
+    Type: String
+    Default: ""
+    Description: (A1 only) Subnet for the front-end EC2 host (a private subnet the ALB can reach).
   AlbSecurityGroupId:
-    Type: AWS::EC2::SecurityGroup::Id
-    Description: The ALB's security group. The host SG accepts the app port ONLY from this SG.
+    Type: String
+    Default: ""
+    Description: (A1 only) The ALB's security group. The host SG accepts the app port ONLY from this SG.
   WebAppPort:
     Type: Number
     Default: 8080
-    Description: Port the front-end service listens on (target-group target port).
+    Description: (A1 only) Port the front-end service listens on (target-group target port).
   InstanceType:
     Type: String
     Default: t3.micro
+    Description: (A1 only) Instance type for the front-end host.
   LatestAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
     Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
-    Description: Amazon Linux 2023 AMI (resolved via SSM public parameter).
+    Description: (A1 only) Amazon Linux 2023 AMI (resolved via SSM public parameter).
 
-  # --- Where the bootstrap pulls the site bundle from -------------------------
+  # --- Where the bootstrap pulls the site bundle from (A1 only) ---------------
   AssetsBucket:
     Type: String
-    Description: S3 bucket holding the deploy artifacts (set by deploy.sh).
+    Default: ""
+    Description: (A1 only) S3 bucket holding the deploy artifacts (set by deploy.sh).
   AssetsKey:
     Type: String
     Default: web-assets.tar.gz
-    Description: Key of the front-end bundle (site/ + feed-sync.sh + units) in AssetsBucket.
+    Description: (A1 only) Key of the front-end bundle (site/ + feed-sync.sh + units) in AssetsBucket.
+
+Conditions:
+  # A1 dedicated-stack mode. When false (default), only the backend resources
+  # are created — the A2-static path.
+  DeployWebHost: !Equals [!Ref DeployWebHost, "true"]
 
 Resources:
 
@@ -180,6 +206,7 @@ Resources:
   # This is what makes the Okta gate impossible to bypass at the network layer.
   WebSecurityGroup:
     Type: AWS::EC2::SecurityGroup
+    Condition: DeployWebHost
     Properties:
       GroupDescription: Weather Machine front-end host - app port from ALB SG only
       VpcId: !Ref VpcId
@@ -197,6 +224,7 @@ Resources:
   # --- Front-end host: instance role (SSM-managed, scoped reads) --------------
   WebInstanceRole:
     Type: AWS::IAM::Role
+    Condition: DeployWebHost
     Properties:
       AssumeRolePolicyDocument:
         Version: "2012-10-17"
@@ -223,11 +251,13 @@ Resources:
 
   WebInstanceProfile:
     Type: AWS::IAM::InstanceProfile
+    Condition: DeployWebHost
     Properties:
       Roles: [!Ref WebInstanceRole]
 
   WebInstance:
     Type: AWS::EC2::Instance
+    Condition: DeployWebHost
     Properties:
       InstanceType: !Ref InstanceType
       ImageId: !Ref LatestAmiId
@@ -283,13 +313,17 @@ Outputs:
     Description: Put the real Slack webhook URL here (see DEPLOYMENT.md).
     Value: !Ref SlackSecret
   WebInstanceId:
+    Condition: DeployWebHost
     Description: Front-end host - register it in the ALB target group on the app port.
     Value: !Ref WebInstance
   WebSecurityGroupId:
+    Condition: DeployWebHost
     Description: Host SG - confirm it accepts the app port only from the ALB SG.
     Value: !Ref WebSecurityGroup
   WebAppPort:
+    Condition: DeployWebHost
     Value: !Ref WebAppPort
   NextSteps:
+    Condition: DeployWebHost
     Description: Builder-provisioned items remaining.
     Value: "Register WebInstanceId in an ALB target group (health '/'), add the HTTPS:443 authenticate-oidc listener rule, point DNS at the ALB, and store the Slack webhook in SlackSecretArn."
