@@ -3,7 +3,7 @@
    office, renders a ranked feed and a Leaflet map, and polls on a loop.
 
    Demo mode: append ?demo=1 to the URL to load bundled sample fixtures from
-   /samples instead of the live APIs. Demo data is national, so the office
+   the relative samples/ folder instead of the live APIs. Demo data is national, so the office
    filter is bypassed in that mode. This lets the map/card code paths be
    exercised on a calm day with no live severe weather. */
 

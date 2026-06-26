@@ -1,0 +1,21 @@
+[Unit]
+Description=Sync Weather Machine feed.json from S3 into the shared landing docroot
+Documentation=https://github.com/gkurtas/fixit
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# Reads SITE_BUCKET / AWS_REGION (and optionally WM_DOCROOT, FEED_KEY) for the
+# shared landing host. Defaults in feed-sync.sh already target /opt/tools/landing/weather.
+EnvironmentFile=/etc/tools-landing/weather.env
+ExecStart=/opt/tools/landing/weather/feed-sync.sh
+# Operator may pin User= to the landing service account (the same one that runs
+# tools-landing.service); omitted here so the unit installs cleanly on any host.
+
+# Hardening - may write only the tool's folder under the shared docroot.
+NoNewPrivileges=true
+ProtectSystem=strict
+ReadWritePaths=/opt/tools/landing/weather
+ProtectHome=true
+PrivateTmp=true
