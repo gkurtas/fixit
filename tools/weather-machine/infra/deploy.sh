@@ -14,24 +14,28 @@
 #       DEPLOY_WEB_HOST=true VPC_ID=... SUBNET_ID=... ALB_SG_ID=... bash infra/deploy.sh
 set -euo pipefail
 
-PROFILE="${AWS_PROFILE:-default}"
+# Only pass --profile when AWS_PROFILE is explicitly set; otherwise let the AWS
+# CLI use ambient credentials (CloudShell, instance roles, etc.), which have no
+# named "default" profile.
+PROFILE_ARGS=()
+if [[ -n "${AWS_PROFILE:-}" ]]; then PROFILE_ARGS=(--profile "$AWS_PROFILE"); fi
 REGION="${AWS_REGION:-us-east-1}"
 STACK="${STACK_NAME:-weather-machine}"
 CONTACT="${CONTACT_EMAIL:-weather-machine@inquirer.com}"
 SITE_URL="${SITE_URL:-}"
 DEPLOY_WEB_HOST="${DEPLOY_WEB_HOST:-false}"
 
-ACCOUNT="$(aws sts get-caller-identity --profile "$PROFILE" --query Account --output text)"
+ACCOUNT="$(aws sts get-caller-identity "${PROFILE_ARGS[@]}" --query Account --output text)"
 DEPLOY_BUCKET="${DEPLOY_BUCKET:-weather-machine-deploy-${ACCOUNT}}"
 ASSETS_KEY="web-assets.tar.gz"
 
 if [ "$DEPLOY_WEB_HOST" = "true" ]; then MODE="A1-dedicated"; else MODE="backend-only"; fi
-echo "Account: $ACCOUNT | Profile: $PROFILE | Region: $REGION | Stack: $STACK | Mode: $MODE"
+echo "Account: $ACCOUNT | Profile: ${AWS_PROFILE:-<ambient>} | Region: $REGION | Stack: $STACK | Mode: $MODE"
 
 # 1. One-time deploy bucket for the Lambda zip (+ the web bundle in A1 mode).
-if ! aws s3api head-bucket --bucket "$DEPLOY_BUCKET" --profile "$PROFILE" 2>/dev/null; then
+if ! aws s3api head-bucket --bucket "$DEPLOY_BUCKET" "${PROFILE_ARGS[@]}" 2>/dev/null; then
   echo "Creating deploy bucket $DEPLOY_BUCKET ..."
-  aws s3api create-bucket --bucket "$DEPLOY_BUCKET" --profile "$PROFILE" --region "$REGION"
+  aws s3api create-bucket --bucket "$DEPLOY_BUCKET" "${PROFILE_ARGS[@]}" --region "$REGION"
 fi
 
 # 2. Lambda source dir (only the two files the function needs). Both modes.
@@ -54,7 +58,7 @@ if [ "$DEPLOY_WEB_HOST" = "true" ]; then
   cp -r infra/systemd .assets/systemd
   tar -czf web-assets.tar.gz -C .assets .
   aws s3 cp web-assets.tar.gz "s3://${DEPLOY_BUCKET}/${ASSETS_KEY}" \
-    --profile "$PROFILE" --region "$REGION"
+    "${PROFILE_ARGS[@]}" --region "$REGION"
 
   PARAMS+=( "VpcId=${VPC_ID}" "SubnetId=${SUBNET_ID}" "AlbSecurityGroupId=${ALB_SG_ID}" \
             "AssetsBucket=${DEPLOY_BUCKET}" "AssetsKey=${ASSETS_KEY}" )
@@ -68,17 +72,17 @@ aws cloudformation package \
   --template-file infra/template.yaml \
   --s3-bucket "$DEPLOY_BUCKET" \
   --output-template-file infra/packaged.yaml \
-  --profile "$PROFILE"
+  "${PROFILE_ARGS[@]}"
 
 aws cloudformation deploy \
   --template-file infra/packaged.yaml \
   --stack-name "$STACK" \
   --capabilities CAPABILITY_IAM \
   --parameter-overrides "${PARAMS[@]}" \
-  --profile "$PROFILE" --region "$REGION"
+  "${PROFILE_ARGS[@]}" --region "$REGION"
 
 # 5. Show outputs.
-aws cloudformation describe-stacks --stack-name "$STACK" --profile "$PROFILE" --region "$REGION" \
+aws cloudformation describe-stacks --stack-name "$STACK" "${PROFILE_ARGS[@]}" --region "$REGION" \
   --query "Stacks[0].Outputs" --output table
 
 if [ "$DEPLOY_WEB_HOST" = "true" ]; then
