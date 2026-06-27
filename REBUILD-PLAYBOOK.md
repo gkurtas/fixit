@@ -1,6 +1,6 @@
 # Tool Rebuild Playbook — Assess, Gap, Rebuild
 
-**The Inquirer · IT / Systems · v1.0**
+**The Inquirer · IT / Systems · v2.0**
 
 A procedure for Claude Code: take an externally-built tool, evaluate it against the platform's build patterns, and reconstruct it into a conforming **fixit repo** — without ever modifying the source.
 
@@ -47,7 +47,7 @@ without touching his repo or opening a PR against it.
 ## The five phases
 
 ```
-1. INTAKE    clone source read-only, set up the fixit repo
+1. INTAKE    name the target host + pull its profile; clone source read-only; set up fixit repo
 2. INVENTORY what does this tool actually do?
 3. CLASSIFY  which pattern(s) is it, per the framework?
 4. GAP       as-built vs. pattern standard → findings table
@@ -58,7 +58,8 @@ without touching his repo or opening a PR against it.
 
 ## Phase 1 — Intake
 
-**Goal:** source code on disk, read-only; an empty fixit repo ready to receive the rebuild.
+**Goal:** source code on disk, read-only; an empty fixit repo ready to receive the rebuild;
+the target host named and its profile in hand.
 
 ```bash
 # Clone the source to a read-only working location. Never push here.
@@ -71,6 +72,25 @@ git clone <FIXIT_REPO_URL> ./fixit   # or: mkdir fixit && git init
 ```
 
 Record in the report: source repo URL, commit SHA assessed, date, who built it.
+
+### Name the target host and pull its profile
+
+The rebuilt tool will run on a specific **target host** — the door it lands behind. Name it
+now: it drives classification (which serving variants the host supports) and the builder spec.
+
+- **Ask the operator for the target host** (e.g. `tools.inquirer.com`). Record it in the
+  report's Source/Intake block.
+- **Read that host's profile** from the platform repo `inquirer-it-tools`, at
+  `hostprofiles/host-profile-<host>.md` — for example `host-profile-tools-inquirer-com.md`
+  (today the only one; the mechanism generalizes as more doors get profiles). Auth:
+  - **Headless / CloudShell:** a fine-grained, read-only PAT scoped to `inquirer-it-tools`.
+  - **Local:** the Windows credential manager handles auth to the same repo.
+- **The profile is an assessment input, never something Code authors.** Code never writes,
+  creates, or updates a host profile. **fixit reads, never writes, the profiles in
+  `inquirer-it-tools`.**
+- **Missing or stale is a stop-and-ask.** If no profile exists for the named host, or its
+  `verified_on` date is stale, surface it to the operator and stop — do not proceed on
+  assumptions about what the host supports.
 
 > **Why a separate repo, not a fork:** a fork keeps a live link to the source and tempts a
 > PR back. The fixit repo is a clean reconstruction the platform owns outright — org
@@ -125,8 +145,39 @@ A tool can resolve to **more than one pattern** — that's expected, not a failu
 dashboard fed by an AI listener is **B + C**. A tool with a public feed *and* an internal
 console spans **D + C** — the signal to treat them as **two products**, rebuilt separately.
 
-State the verdict explicitly: *"Target: Pattern C — Pattern A dashboard reading from a
-Pattern B Lambda backend."*
+### Pattern A has three serving variants — name which
+
+When the verdict includes **Pattern A**, resolve it further. The shape of the front-end and
+what the **host profile** says the named host supports decide which:
+
+- **A1 — dedicated host/hostname.** Its own hostname, Okta app, target group, listener rule,
+  and (typically) its own host or port. The original Pattern A shape. Choose it when the tool
+  genuinely needs isolation — its own IAM role, its own audience boundary, scoped secrets the
+  shared host can't separate.
+- **A2-static — static files on a shared landing host.** The front-end is **built static
+  files** (HTML/JS/CSS/assets) dropped into the shared landing host's serving directory under
+  a path prefix (`/<tool>/`), reached through the **existing** Okta gate. **Zero ALB / Okta /
+  DNS changes** — the fast path. Choose it when the front-end is static and the host's listener
+  is catch-all (confirm from the host profile's A2 routing facts).
+- **A2-port — service on its own port on a shared host.** The tool runs as its own service on
+  its own port on the shared host. A static-file landing server **cannot** reach it (it serves
+  files, it does not proxy), so it needs a per-tool target group + an ALB path-pattern rule +
+  a host-SG ingress for the port — tipping toward A1's machinery even on a shared host. Choose
+  it only when the front-end must run as a live service and isolation isn't required.
+
+**Decision aid — is the front-end static or a live service?** Static → **A2-static** (if the
+host profile says the listener is catch-all and supports it). Live service → **A2-port** or
+**A1**. Needs isolation → **A1**. The **host profile is authoritative** for what the named host
+supports — its `Supports variant(s)`, A2 routing facts, and serving-layer facts. Classify
+against the profile, not against assumptions.
+
+**Backend split.** A tool can be an **A2-static front-end + Pattern B backend** — the Weather
+Machine shape: a static page fed by a Lambda backend. Record the front-end variant and the
+backend pattern **separately** in the verdict.
+
+State the verdict explicitly, naming the Pattern A variant where one applies:
+*"Target: A2-static front-end (`tools.inquirer.com/weather/`) reading from a Pattern B Lambda
+backend."*
 
 ---
 
@@ -205,7 +256,9 @@ the builder provisions it last. Concretely:
 
 ### Per-pattern rebuild targets (what "conforming" means)
 
-**Pattern A — always-on internal web tool**
+**Pattern A — internal web tool (three variants; carry the one from classification)**
+
+*A1 — dedicated host/hostname*
 `Route 53 → ALB (HTTPS + Okta) → target group → EC2 service on its own port`
 - App runs as a `systemd` service on a dedicated port (survives reboot).
 - Host SG opens that port **only from the ALB SG by ID** — never an IP range.
@@ -213,6 +266,25 @@ the builder provisions it last. Concretely:
 - Okta OIDC app + access group for this door.
 - HTTPS:443 listener rule — host-header condition → **authenticate (OIDC)** → **forward**.
 - DNS alias → ALB. No login code in the app; no nginx required.
+
+*A2-static — static bundle on a shared landing host*
+`existing ALB+Okta gate → shared landing host serves /<tool>/ as static files`
+- A clean **built static bundle** dropped into the shared docroot under `/<tool>/`, reached
+  through the **existing** gate. **No new** Okta app/group, target group, listener rule, DNS
+  record, or port — the builder spec on the ALB/Okta side is nearly empty, and that is a
+  **feature, not an omission**.
+- The bundle is **only** the served set — no server-side files mixed in (e.g. do not publish a
+  dev/port server script into the docroot).
+- Health path under the prefix: `/<tool>/healthz`.
+- A documented **build step** that emits the static bundle.
+
+*A2-port — service on its own port on a shared host*
+`existing ALB+Okta gate → per-tool path rule → service on its own port on the shared host`
+- App runs as a `systemd` service on an allocated port.
+- **Per-tool target group** (health-check path).
+- **ALB path-pattern rule** (`/<tool>/*` → forward to that TG) at the lowest free priority.
+- **Host-SG ingress** opening the port from the ALB SG by ID.
+- Reuses the existing Okta gate (no new app/group) unless isolation is required.
 
 **Pattern B — event-driven / AI backend**
 `Event/schedule → Lambda → (Bedrock for inference) → output (S3 / Slack / data store)`
@@ -239,6 +311,37 @@ the builder provisions it last. Concretely:
 - For life-safety content, latency and availability needs stated explicitly and reviewed
   before build.
 
+### Template rule — A2 tools must support a backend-only deploy
+
+A tool with a backend (Lambda + inference, a data feed) must be deployable **backend-only** —
+provisioning the backend (function, role, schedule, data bucket) **without** bundling a
+dedicated front-end host. Gate any dedicated front-end host behind an explicit, **default-off**
+condition, so the A2 path (a static bundle, or a port service on the shared host) is the
+default and the dedicated A1 host is opt-in.
+
+> Origin: the Weather Machine template was A1-only — it hard-gated on VPC/subnet/ALB inputs and
+> provisioned an inseparable front-end EC2 host, which had to be split into a condition-gated
+> backend-only path before it could deploy A2.
+
+### The playbook stops at the spec — execution facts live elsewhere
+
+This playbook produces the **spec**; it does not deploy. The **execution mechanics** of a given
+host live in that host's **profile** (`inquirer-it-tools/hostprofiles/…`) and in the **deploy
+runbook** — not here. Expect to find there (do not restate them in the assessment):
+
+- which `aws` binary is runnable as the host's **service account** (an account whose home is
+  outside `/home` can hit a broken snap CLI — the profile records the runnable path),
+- **docroot ownership** — the per-tool directory must be created and chowned before writing,
+- **helper scripts (feed-sync, content pullers) live OUTSIDE the web-served docroot** — the
+  docroot is web-served, and an A2 `--delete` sync wipes any file not in the source bundle,
+- **SSM file-write quirks** — heredocs mangle through `AWS-RunShellScript`; base64-decode on
+  the host is the reliable pattern.
+
+**Assessment-time rule:** before emitting an A2 rebuild/builder spec whose delivery will run
+commands as the host's service account, confirm the host profile records a
+service-account-runnable `aws` path. If it doesn't, **stop-and-ask**. Cross-reference the host
+profile and the deploy runbook by name; never copy their contents into the assessment.
+
 ### Stop point
 
 After producing the plan, **stop and present**. Generate fixit code only after the operator
@@ -256,12 +359,14 @@ A single markdown report, structured exactly so:
 
 ## Source
 - Repo: <url>   Commit: <sha>   Built by: <name>   Assessed: <date>
+- Target host: <host>   Host profile: <path> (verified_on: <date>)
 
 ## Inventory
 <the 8-question factual description, with file/line evidence>
 
 ## Classification
-Target pattern(s): <verdict + one-line rationale>
+Target pattern(s): <verdict — name the Pattern A variant (A1 / A2-static / A2-port) and,
+where applicable, the backend pattern, e.g. "A2-static front-end + Pattern B backend">
 
 ## Findings
 <the findings table: ID | finding | violates | severity | pattern target>
@@ -270,17 +375,31 @@ High: <n>   Medium: <n>   Low: <n>
 ## Rebuild plan
 <ordered steps, request-path order; mark which are builder-provisioned vs. code>
 
-## Builder spec (for the items Claude Code can't provision)
-- Okta: app + group <name>, redirect URI <…>
-- Host SG: open port <p> from ALB SG <id>
-- Target group: instance:<p>, health check <path>
-- Listener rule: host-header <host> → authenticate → forward
+## Builder spec (for the items Claude Code can't provision) — variant-aware
+- A2-static: no ALB / Okta / DNS / target-group / port changes; static bundle into
+  /<tool>/ on <host> (resolves through the existing gate).
+- A2-port:   per-tool target group (health <path>); ALB path rule /<tool>/* → forward;
+             host-SG ingress opening port <p> from the ALB SG <id>; the port <p>.
+- A1:        Okta app + group <name>, redirect URI <…>; host SG opens port <p> from ALB SG
+             <id>; target group instance:<p>, health <path>; listener rule host-header
+             <host> → authenticate → forward; DNS alias → ALB.
 
 ## Open questions / divergences
-<anything that doesn't fit cleanly — surfaced, not absorbed>
+<anything that doesn't fit cleanly — surfaced, not absorbed; e.g. a missing/stale host
+profile, or an isolation-vs-shared-host judgment call>
 ```
 
 Then, on confirmation, the fixit repo is populated and the tool is ready to host and demo.
+
+---
+
+## Changelog
+
+- **v2.0** — Pattern A sub-classified into **A1 / A2-static / A2-port**; **host-target intake**
+  + read-only host-profile pull added (Phase 1); **backend-only-template rule** added (Phase 5);
+  execution mechanics pointed **out** to the host profile and deploy runbook. Origin: first live
+  run (the Weather Machine).
+- **v1.0** — Initial five-phase playbook.
 
 ---
 
