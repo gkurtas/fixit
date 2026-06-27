@@ -1,267 +1,212 @@
-# Deployment — Philadelphia Weather Machine (fixit)
+# Deployment — Philadelphia Weather Machine (A2-static)
 
-A step-by-step runbook to stand up the tool as **Pattern C**: a Pattern A
-Okta-gated EC2 front-end reading `feed.json` from S3, fed by a Pattern B
-EventBridge → Lambda(+Bedrock) backend.
+This is the deploy runbook for the path the Weather Machine actually uses: **A2-static**.
 
-Each step is tagged:
+- **Front-end** serves as **built static files** dropped into the shared landing host's
+  serving directory under a path prefix — `tools.inquirer.com/weather/` — reached through the
+  host's **existing** Okta gate. **No ALB / Okta / DNS / target-group / port changes.**
+- **Backend** is a **backend-only** Lambda stack (Pattern B) that writes `feed.json` to a
+  private S3 bucket; the host syncs that file beside `index.html` on a timer.
 
-- **[BUILDER]** — provisioned by the operator (network/identity boundary). This
-  repo cannot create these; it gives you the exact spec and commands.
-- **[CODE]** — handled by this repo (`infra/deploy.sh` + the CloudFormation
-  template).
+See the classification in [ASSESSMENT.md](ASSESSMENT.md) and the variant definitions in
+[REBUILD-PLAYBOOK.md](../../REBUILD-PLAYBOOK.md) (Pattern A → **A2-static**).
 
-Steps are ordered the way the platform teaches a request — **identity/network
-boundary → app → secret → verify**. A few boundary pieces (target group,
-listener, DNS) are finished *after* the stack deploy because they reference the
-EC2 instance it creates; that ordering is called out inline.
+Steps are tagged **[CODE]** (run from this repo) or **[BUILDER]** (operator action on AWS or
+on the shared host, via SSM).
 
 ---
 
-## 0. Prerequisites
+## Host-specific values — from the host profile (do not guess)
 
-- AWS CLI v2 configured for the **org** account (`export AWS_PROFILE=<org-profile>`).
-  Do **not** use a personal profile or root.
-- An existing **VPC** and a **subnet** the ALB can route to.
-- Okta admin access (or your IdP team) to create an OIDC app + access group.
-- Region: **us-east-1** (Bedrock model + the stack default).
-- `bash`, `tar`, and this repo checked out locally.
+The shared host's execution facts are **owned by the host profile**, not by this runbook. Read
+`inquirer-it-tools/hostprofiles/host-profile-tools-inquirer-com.md` (read-only) and confirm it
+before deploying. If the profile is **missing or its `verified_on` is stale, STOP** and raise
+it with the operator (per the playbook). Pull these values from it:
 
-Set the values you'll reuse:
+| Placeholder | Meaning (from the host profile) |
+|-------------|--------------------------------|
+| `<AWS_BIN>` | The `aws` binary path **runnable as the landing host's service account** (a service account whose home is outside `/home` can hit a broken snap CLI — the profile records the runnable path). |
+| `<SVC_USER>` | The service account that owns the docroot and runs `tools-landing.service`. |
+| `<DOCROOT_BASE>` | The landing host's served directory (the tool lands at `<DOCROOT_BASE>/weather`). Expected: `/opt/tools/landing`. |
+| `<SSM_WRITE>` | The profile's documented pattern for writing files on the host via SSM (heredocs mangle through `AWS-RunShellScript`; **base64-decode on the host** is the reliable pattern). |
+
+Confirm from the profile that the host **Supports variant: A2-static**, its **listener is
+catch-all** (so `/weather/` resolves with no new rule), and that a service-account-runnable
+`aws` path is recorded. The third is the **assessment-time gate** — without it, do not run the
+front-end delivery steps below.
+
+---
+
+## Prerequisites
+
+- AWS access to the org account — CloudShell (ambient credentials) or `AWS_PROFILE=<org>`.
+  `deploy.sh` passes `--profile` only when `AWS_PROFILE` is set, so CloudShell needs nothing.
+- Region **us-east-1** (Bedrock model + stack default).
+- One-time: **Bedrock model access** enabled for Claude Sonnet 4.6 in us-east-1 (console →
+  Model access → submit the Anthropic use-case form). Until then, rewrites fall back to
+  official text and the page still works.
+- SSM Session Manager / Run Command access to the shared landing host.
+
+---
+
+## Part 1 — Backend (Pattern B), backend-only  [CODE]
+
+Deploys only the backend: `SiteBucket`, `CacheTable`, `RewriteFunction` (+ role/permission),
+the 3-minute schedule, and the `SlackSecret`. **No EC2 front-end host** — that's the default
+(`DeployWebHost=false`).
 
 ```bash
-export AWS_PROFILE=<org-profile>
-export AWS_REGION=us-east-1
-export STACK_NAME=weather-machine
-export HOSTNAME=weather-machine.intra.inquirer.com   # the internal hostname you'll gate
-```
-
----
-
-## 1. [BUILDER] Enable the Bedrock model (one-time)
-
-In the **Bedrock console (us-east-1)** → Model access, enable
-**Claude Sonnet 4.6** and submit the Anthropic use-case details form. Until this
-is granted, `bedrock:InvokeModel` is rejected and rewrites fall back to official
-text (the app still works; it just won't simplify).
-
----
-
-## 2. [BUILDER] Create the Okta OIDC app + access group
-
-In the Okta admin console:
-
-1. **Applications → Create App Integration → OIDC → Web Application.**
-2. Sign-in redirect URI: `https://<HOSTNAME>/oauth2/idpresponse`
-   (the ALB's fixed OIDC callback path).
-3. Capture **Client ID**, **Client secret**, and your Okta **issuer**
-   (`https://<org>.okta.com`).
-4. Create/assign an **access group** (e.g. `newsroom-weather-machine`) and add the
-   newsroom users. Assign the app to that group — this group *is* the door.
-
-These three OIDC values feed the ALB listener rule in step 6.
-
----
-
-## 3. [BUILDER] Create the ALB and its security group
-
-The host security group the stack creates references the **ALB's** security
-group, so the ALB SG must exist first.
-
-```bash
-# ALB security group (HTTPS in from the internal network / VPN range as per org policy)
-ALB_SG_ID=$(aws ec2 create-security-group \
-  --group-name weather-machine-alb --description "WM ALB" \
-  --vpc-id <VPC_ID> --query GroupId --output text)
-
-# Internet-facing or internal per your org's ALB convention; HTTPS:443 listener added in step 6.
-ALB_ARN=$(aws elbv2 create-load-balancer --name weather-machine-alb \
-  --type application --subnets <SUBNET_A> <SUBNET_B> \
-  --security-groups "$ALB_SG_ID" \
-  --scheme internal \
-  --query 'LoadBalancers[0].LoadBalancerArn' --output text)
-```
-
-Note the **ALB_SG_ID** — it's a required input to the stack.
-
----
-
-## 4. [CODE] Deploy the stack
-
-This creates the private S3 bucket, DynamoDB cache, the Bedrock Lambda + scoped
-role, the 3-minute schedule, the empty **Secrets Manager** secret, and the
-**EC2 front-end host** with its scoped instance role and its security group
-(which accepts the app port **only from the ALB SG**).
-
-```bash
-export VPC_ID=<VPC_ID>
-export SUBNET_ID=<SUBNET_ID>          # a subnet the ALB reaches
-export ALB_SG_ID=<ALB_SG_ID>          # from step 3
-export SITE_URL="https://${HOSTNAME}" # used only in Slack links
-
+cd tools/weather-machine
+# CloudShell: ambient creds. Otherwise: export AWS_PROFILE=<org-profile>
 bash infra/deploy.sh
 ```
 
-When it finishes, note the stack outputs — you'll need **WebInstanceId**,
-**WebAppPort** (default 8080), **SlackSecretArn**, and **SiteBucket**:
+Note the outputs — you need **`SiteBucket`** and **`SlackSecretArn`** below:
 
 ```bash
-aws cloudformation describe-stacks --stack-name "$STACK_NAME" \
+aws cloudformation describe-stacks --stack-name weather-machine \
   --query "Stacks[0].Outputs" --output table
 ```
 
-The EC2 host bootstraps itself via UserData: it pulls the front-end bundle,
-installs the `systemd` units, and starts `weather-machine-web` (the static
-server) and the `feed-sync` timer. It is **SSM-managed — no SSH key pair, no
-inbound 22.** Confirm it registered with SSM:
+Seed `feed.json` immediately (or wait for the schedule):
 
 ```bash
-aws ssm describe-instance-information \
-  --query "InstanceInformationList[?InstanceId=='<WebInstanceId>']"
+aws lambda invoke --function-name <FunctionName> /tmp/out.json && cat /tmp/out.json
+aws s3 ls "s3://<SiteBucket>/feed.json"        # confirm it landed
 ```
 
----
-
-## 5. [BUILDER] Target group → register the host
+Store the real Slack webhook (optional; until set, Slack is simply skipped):  **[BUILDER]**
 
 ```bash
-TG_ARN=$(aws elbv2 create-target-group --name weather-machine-tg \
-  --protocol HTTP --port 8080 --vpc-id "$VPC_ID" --target-type instance \
-  --health-check-protocol HTTP --health-check-path / \
-  --query 'TargetGroups[0].TargetGroupArn' --output text)
-
-aws elbv2 register-targets --target-group-arn "$TG_ARN" \
-  --targets Id=<WebInstanceId>,Port=8080
-
-# Wait for healthy (the health check hits '/', which serves index.html):
-aws elbv2 describe-target-health --target-group-arn "$TG_ARN" \
-  --query 'TargetHealthDescriptions[].TargetHealth.State'
-```
-
----
-
-## 6. [BUILDER] HTTPS listener → authenticate (Okta) → forward
-
-This is the gate. The HTTPS:443 listener authenticates with Okta **before**
-forwarding to the target group, so an unauthenticated request never reaches the
-app.
-
-```bash
-# 443 listener (needs an ACM cert for the hostname):
-LISTENER_ARN=$(aws elbv2 create-listener --load-balancer-arn "$ALB_ARN" \
-  --protocol HTTPS --port 443 \
-  --certificates CertificateArn=<ACM_CERT_ARN> \
-  --default-actions Type=fixed-response,FixedResponseConfig='{StatusCode=403,ContentType=text/plain,MessageBody=Forbidden}' \
-  --query 'Listeners[0].ListenerArn' --output text)
-
-# Rule: host-header match -> authenticate-oidc (Okta) -> forward to the target group.
-aws elbv2 create-rule --listener-arn "$LISTENER_ARN" --priority 10 \
-  --conditions Field=host-header,Values="$HOSTNAME" \
-  --actions '[
-    {
-      "Type":"authenticate-oidc","Order":1,
-      "AuthenticateOidcConfig":{
-        "Issuer":"https://<org>.okta.com",
-        "AuthorizationEndpoint":"https://<org>.okta.com/oauth2/v1/authorize",
-        "TokenEndpoint":"https://<org>.okta.com/oauth2/v1/token",
-        "UserInfoEndpoint":"https://<org>.okta.com/oauth2/v1/userinfo",
-        "ClientId":"<OKTA_CLIENT_ID>",
-        "ClientSecret":"<OKTA_CLIENT_SECRET>",
-        "OnUnauthenticatedRequest":"authenticate"
-      }
-    },
-    {"Type":"forward","Order":2,"TargetGroupArn":"'"$TG_ARN"'"}
-  ]'
-```
-
----
-
-## 7. [BUILDER] DNS → ALB
-
-Point the internal hostname at the ALB (Route 53 alias):
-
-```bash
-# A-record alias <HOSTNAME> -> <ALB DNS name>. Example via change-resource-record-sets,
-# or in the console: Alias = Yes, target = the ALB.
-aws elbv2 describe-load-balancers --load-balancer-arns "$ALB_ARN" \
-  --query 'LoadBalancers[0].DNSName' --output text
-```
-
----
-
-## 8. [BUILDER] Store the Slack webhook in Secrets Manager
-
-The stack created the secret empty so the Lambda starts without it (it just
-skips Slack). Put the real webhook URL in when ready — it never touches source:
-
-```bash
-aws secretsmanager put-secret-value \
-  --secret-id <SlackSecretArn> \
+aws secretsmanager put-secret-value --secret-id <SlackSecretArn> \
   --secret-string "https://hooks.slack.com/services/XXX/YYY/ZZZ"
 ```
 
 ---
 
-## 9. Seed and verify
+## Part 2 — Front-end (A2-static) onto the shared landing host
 
-**Backend** — invoke once so `feed.json` exists immediately (or wait 3 min):
+The served set is the **static bundle only**. `site/serve.py` is the dev / A2-port server and
+**must not** be published into the docroot (playbook: no server-side files in the served set).
+`feed-sync.sh` and the systemd units are **control files** and live **outside** the docroot.
 
-```bash
-aws lambda invoke --function-name <FunctionName> /tmp/out.json && cat /tmp/out.json
-# Confirm the feed landed in the private bucket:
-aws s3 ls "s3://<SiteBucket>/feed.json"
-```
+### 2a. Stage the static bundle to S3  [CODE]
 
-**Slack wiring** (optional self-test, no storm needed):
-
-```bash
-aws lambda invoke --function-name <FunctionName> \
-  --cli-binary-format raw-in-base64-out --payload '{"slack_test": true}' /tmp/o.json && cat /tmp/o.json
-```
-
-**Front-end / gate** — browse to `https://<HOSTNAME>`. You should be bounced to
-Okta, and after login see the live page. Confirm the boundary holds:
-
-- Hitting the EC2 host's app port directly (not via the ALB) must **fail** —
-  the host SG only allows the ALB SG. That non-route is the whole point.
-- The feed refreshes: the `feed-sync` timer pulls `feed.json` every minute.
+Reuse the private `SiteBucket` (the host already reads `feed.json` from it) under a `site/`
+prefix, excluding the dev server:
 
 ```bash
-# On the host (via SSM Session Manager, since there's no SSH):
-systemctl status weather-machine-web.service feed-sync.timer --no-pager
-journalctl -u feed-sync.service -n 20 --no-pager
+cd tools/weather-machine
+aws s3 sync site/ "s3://<SiteBucket>/site/" --exclude "serve.py" --delete
 ```
+
+(`feed.json` lives at the bucket **root**, not under `site/`, so this never touches it.)
+
+### 2b. Create and own the per-tool docroot  [BUILDER, on host via SSM]
+
+```bash
+sudo install -d -o <SVC_USER> -g <SVC_USER> <DOCROOT_BASE>/weather
+```
+
+### 2c. Pull the bundle into the docroot  [BUILDER, on host via SSM]
+
+```bash
+<AWS_BIN> s3 sync "s3://<SiteBucket>/site/" <DOCROOT_BASE>/weather/ --delete --exclude "feed.json"
+```
+
+> **`--delete` gotcha (this bit us before):** a `--delete` sync wipes any file in the target
+> not present in the source. `feed.json` is written into the docroot by the timer (2d), **not**
+> by this bundle — so it **must** be `--exclude`d here, or each sync would delete the feed.
+> This is also why the control scripts live outside the docroot: they'd be wiped too.
+
+### 2d. Install the feed-sync control files OUTSIDE the docroot  [BUILDER, on host via SSM]
+
+Place the script and runtime env where the web server never serves them and the bundle sync
+never deletes them — e.g. `<DOCROOT_BASE>/weather-control/`. Use the profile's `<SSM_WRITE>`
+base64 pattern to write files (heredocs mangle through `AWS-RunShellScript`):
+
+```bash
+sudo install -d <DOCROOT_BASE>/weather-control
+# feed-sync.sh: base64-encode locally, decode on the host (per <SSM_WRITE>), e.g.
+#   base64 -d <<<'<b64 of infra/feed-sync.sh>' | sudo tee <DOCROOT_BASE>/weather-control/feed-sync.sh
+sudo chmod +x <DOCROOT_BASE>/weather-control/feed-sync.sh
+
+# Runtime env read by the units:
+sudo install -d /etc/tools-landing
+printf 'SITE_BUCKET=%s\nAWS_REGION=us-east-1\nWM_DOCROOT=%s/weather\nFEED_KEY=feed.json\n' \
+  "<SiteBucket>" "<DOCROOT_BASE>" | sudo tee /etc/tools-landing/weather.env
+```
+
+Install the units and enable the timer (decode them from `infra/systemd/` the same way):
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now weather-feed-sync.timer
+sudo systemctl start weather-feed-sync.service     # first sync now
+```
+
+> **Divergence to fix in the repo (surfaced, not absorbed):**
+> `infra/systemd/weather-feed-sync.service` currently sets
+> `ExecStart=/opt/tools/landing/weather/feed-sync.sh` — **inside** the docroot, which
+> contradicts the "control files outside the docroot" rule (it would be web-served and
+> `--delete`-wiped). Before installing, point `ExecStart` at the control path, e.g.
+> `<DOCROOT_BASE>/weather-control/feed-sync.sh`. It's a one-line unit fix, flagged here, not
+> in this runbook's scope.
+
+### 2e. Grant the host read access to the feed bucket  [BUILDER]
+
+The shared host's instance role (owned with the host in `inquirer-it-tools`) needs
+`s3:GetObject` on the bundle prefix and the feed:
+
+```
+s3:GetObject on  arn:aws:s3:::<SiteBucket>/site/*
+s3:GetObject on  arn:aws:s3:::<SiteBucket>/feed.json
+```
+
+---
+
+## Part 3 — Verify
+
+```bash
+# Through the gate, in a browser (Okta login expected):
+#   https://tools.inquirer.com/weather/           -> the page renders
+#   https://tools.inquirer.com/weather/healthz     -> "ok"
+#   https://tools.inquirer.com/weather/feed.json   -> present and fresh
+
+# On the host (via SSM):
+systemctl status weather-feed-sync.timer --no-pager
+journalctl -u weather-feed-sync.service -n 20 --no-pager
+ls -l <DOCROOT_BASE>/weather/feed.json
+```
+
+If `feed.json` is missing the page still works via its live-API fallback (no AI summaries) —
+that points at 2c/2d/2e (bundle sync, the timer, or the IAM grant), not the page itself.
 
 ---
 
 ## Updating later
 
-- **Backend / Lambda or front-end files:** re-run `bash infra/deploy.sh`. It
-  refreshes the Lambda and re-uploads the web bundle. Front-end file changes
-  need the host to re-bootstrap — either re-run UserData via SSM Run Command, or
-  terminate the instance and let CloudFormation replace it (the timer + service
-  come back automatically; nothing on the box is stateful).
-- **`feed.json`:** nothing to do — the backend rewrites and the timer syncs.
+- **Front-end change:** re-run **2a** (stage) then **2c** (pull). The `--exclude feed.json`
+  rule still applies.
+- **Backend / Lambda change:** re-run `bash infra/deploy.sh` (Part 1).
+- **`feed.json`:** nothing to do — the Lambda writes it and the timer syncs it.
 
 ## Teardown
 
 ```bash
-# Empty the buckets first, then:
-aws cloudformation delete-stack --stack-name "$STACK_NAME"
-# Remove the builder-provisioned ALB, target group, listener, Okta app, and DNS record separately.
+# Backend: empty the bucket, then delete the stack.
+aws cloudformation delete-stack --stack-name weather-machine
+# Front-end: remove <DOCROOT_BASE>/weather and the weather-control files + units on the host.
 ```
 
 ---
 
-## Builder spec (quick reference)
+## A1 alternative (dedicated host) — not used here
 
-| Item | Value |
-|------|-------|
-| Okta | OIDC web app + access group `newsroom-weather-machine`; redirect `https://<HOSTNAME>/oauth2/idpresponse` |
-| Host SG | app port (8080) from **ALB SG by id** only — created by the stack |
-| Target group | `instance:8080`, health check path `/` |
-| Listener rule | HTTPS:443, host-header `<HOSTNAME>` → authenticate-oidc → forward |
-| DNS | alias `<HOSTNAME>` → ALB |
-| Secret | Slack webhook URL → Secrets Manager `weather-machine/slack-webhook` |
+If a future tool needs isolation (its own hostname, Okta app, target group, IAM role), the
+repo still supports the **A1** path: `DEPLOY_WEB_HOST=true VPC_ID=… SUBNET_ID=… ALB_SG_ID=…
+bash infra/deploy.sh` provisions the dedicated EC2 front-end host, and the stack emits the full
+builder spec (target group, listener rule, host-SG ingress, DNS). See the **A1** target in
+[REBUILD-PLAYBOOK.md](../../REBUILD-PLAYBOOK.md). The Weather Machine does not use it.
 
 *The Inquirer · IT / Systems · Confidential — internal*
