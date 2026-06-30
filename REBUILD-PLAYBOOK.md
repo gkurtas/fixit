@@ -80,8 +80,9 @@ now: it drives classification (which serving variants the host supports) and the
 
 - **Ask the operator for the target host** (e.g. `tools.inquirer.com`). Record it in the
   report's Source/Intake block.
-- **Read that host's profile** from the platform repo `inquirer-it-tools`, at
-  `hostprofiles/host-profile-<host>.md` — for example `host-profile-tools-inquirer-com.md`
+- **Read that host's profile** from the platform repo `INQ-System/inquirer-it-tools`
+  (https://github.com/INQ-System/inquirer-it-tools — a private org repo; pull it, don't guess
+  the owner), at `hostprofiles/host-profile-<host>.md` — for example `host-profile-tools-inquirer-com.md`
   (today the only one; the mechanism generalizes as more doors get profiles). Auth:
   - **Headless / CloudShell:** a fine-grained, read-only PAT scoped to `inquirer-it-tools`.
   - **Local:** the Windows credential manager handles auth to the same repo.

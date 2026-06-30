@@ -19,7 +19,8 @@ on the shared host, via SSM).
 ## Host-specific values — from the host profile (do not guess)
 
 The shared host's execution facts are **owned by the host profile**, not by this runbook. Read
-`inquirer-it-tools/hostprofiles/host-profile-tools-inquirer-com.md` (read-only) and confirm it
+`INQ-System/inquirer-it-tools/hostprofiles/host-profile-tools-inquirer-com.md`
+(https://github.com/INQ-System/inquirer-it-tools, read-only) and confirm it
 before deploying. If the profile is **missing or its `verified_on` is stale, STOP** and raise
 it with the operator (per the playbook). Pull these values from it:
 
